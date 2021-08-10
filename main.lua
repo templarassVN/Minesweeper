@@ -1,14 +1,24 @@
 require "src/Dependencies"
 math.randomseed(os.time())
 
-local game = GameGrid(GRID_SIZE,GRID_SIZE)
+
 
 function love.load( ... )
 	-- body
 	push:setupScreen(VIRTUAL_WIDTH,VIRTUAL_HEIGHT,WINDOW_WIDTH, WINDOW_HEIGHT)
-	grid = {}
 	
+	gStateMachine = StateMachine{
+		['title'] = function() return TitleState( ) end,
+		['play'] = function() return PlayState(  ) end,
+		['victory'] = function() return VictoryState() end,
+		['lose'] = function() return GameOverState() end
+			-- body
+	}
+
+	gStateMachine:change('title')
+
 	love.mouse.buttonpressed = {}
+	love.keyboard.keypressed = {}
 end
 
 function love.mousepressed(x,y,button,istouch,presses)
@@ -25,28 +35,32 @@ function love.mouse.wasPressed( button )
 
 end
 
+function love.keyboard.wasPressed( key )
+	-- body
+	return love.keyboard.keypressed[key]
+end
+
 function love.keypressed( key )
 	-- body
 	if key == 'escape' then
 		love.event.quit()
 	end
+	
+	love.keyboard.keypressed[key] = true
 end
+
+
 
 function love.update( dt )
 	-- body
-	game:update(dt)
-	
-	
+	gStateMachine:update(dt)
+
+	love.keyboard.keypressed = {}
 end
 
 function love.draw( ... )
 	-- body
 	push:start()
-	love.graphics.clear(0.42,0.42,0.42,1)
-
-	love.graphics.printf('0',0,0,VIRTUAL_WIDTH, 'right')
-
-	game:CalculateNumber()
-	game:render()
+	gStateMachine:render()
 	push:finish()
 end

@@ -1,5 +1,5 @@
 GameGrid = Class{}
-local x_2light, y_2light
+x_2light, y_2light = 0
 
 function GameGrid:init(width,height)
 	-- body
@@ -83,12 +83,19 @@ end
 
 function GameGrid:update(dt)
 	-- body
-	x_2light, y_2light= push:toGame(love.mouse.getPosition())	
+	x_2light, y_2light = push:toGame(love.mouse.getPosition())
+	print(x_2light)	
 end
 
 function GameGrid:revealTiles(x,y)
 	-- body
-	if self.grid[y][x].isBom or not self.grid[y][x].isHidden then self.grid[y][x].isHidden = false return end
+	if self.grid[y][x].isBom then
+		self.grid[y][x].isHidden = false
+		gStateMachine:change('lose') 
+		return
+	end
+
+	if not self.grid[y][x].isHidden then return end
 
 	self.grid[y][x].isHidden = false
 
@@ -118,16 +125,18 @@ function GameGrid:render( ... )
 	-- body
 	for y = 1,self.height do
 		for x = 1,self.width do
-
+			
 			self.grid[y][x]:render(self.MARGIN_x+(x-1)*TILE_SIZE, self.MARGIN_y + (y-1) * TILE_SIZE)
 
 			if x_2light >= self.MARGIN_x+(x-1)*TILE_SIZE and x_2light < self.MARGIN_x+(x-1)*TILE_SIZE + TILE_SIZE then
 				if y_2light >= self.MARGIN_y+(y-1)*TILE_SIZE and y_2light < self.MARGIN_y+(y-1)*TILE_SIZE + TILE_SIZE then
 					--color 2light
-					love.graphics.setColor(1,1,1,0.3)
-					love.graphics.rectangle('fill',self.MARGIN_x+(x-1)*TILE_SIZE,self.MARGIN_y+(y-1)*TILE_SIZE,TILE_SIZE,TILE_SIZE)
-					-- reset color
-					love.graphics.setColor(1,1,1,1)
+					if self.grid[y][x].isHidden then
+						love.graphics.setColor(1,1,1,0.3)
+						love.graphics.rectangle('fill',self.MARGIN_x+(x-1)*TILE_SIZE,self.MARGIN_y+(y-1)*TILE_SIZE,TILE_SIZE,TILE_SIZE)
+						-- reset color
+						love.graphics.setColor(1,1,1,1)
+					end
 					-- click reveal
 					if love.mouse.wasPressed(1) then
 						love.graphics.print('click',self.MARGIN_x+(x-1)*TILE_SIZE,self.MARGIN_y+(y-1)*TILE_SIZE)

@@ -3,6 +3,13 @@ Class = require "lib/class"
 require "src/constant"
 require "src/GameGrid"
 require "src/GridTile"
+require "src/StateMachine"
+
+require "src/states/BaseState"
+require "src/states/TitleState"
+require "src/states/PlayState"
+require "src/states/VictoryState"
+require "src/states/GameOverState"
 love.graphics.setDefaultFilter('nearest','nearest')
 
 gTexture = {
